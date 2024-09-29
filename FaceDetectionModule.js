@@ -11,9 +11,7 @@ class FaceDetectionModule {
   }
 
   async loadModels() {
-    // CDN path for the hosted models
-    const cdnPath = 'https://mammenmathewz.github.io/User_face_Validater/models';
-    
+    const cdnPath = 'https://mammenmathewz.github.io/User_face_Validater/models'; 
     try {
       await faceapi.nets.tinyFaceDetector.loadFromUri(`${cdnPath}`);
       await faceapi.nets.faceLandmark68Net.loadFromUri(`${cdnPath}`);
