@@ -11,10 +11,13 @@ class FaceDetectionModule {
   }
 
   async loadModels() {
+    // CDN path for the hosted models
+    const cdnPath = 'https://mammenmathewz.github.io/User_face_Validater/models';
+    
     try {
-      await faceapi.nets.tinyFaceDetector.load('/models');
-      await faceapi.nets.faceLandmark68Net.load('/models');
-      await faceapi.nets.faceRecognitionNet.load('/models');
+      await faceapi.nets.tinyFaceDetector.loadFromUri(`${cdnPath}`);
+      await faceapi.nets.faceLandmark68Net.loadFromUri(`${cdnPath}`);
+      await faceapi.nets.faceRecognitionNet.loadFromUri(`${cdnPath}`);
       console.info('Face detection models loaded successfully.');
       this.modelsLoaded = true;
     } catch (error) {
