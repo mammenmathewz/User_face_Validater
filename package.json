@@ -1,18 +1,22 @@
 {
   "name": "face-detection-module",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "description": "A module for real-time face detection using face-api.js",
   "main": "FaceDetectionModule.js",
   "scripts": {
     "test": "echo \"No tests specified\" && exit 0"
   },
-  "keywords": ["face-detection", "face-api.js", "computer-vision"],
+  "keywords": [
+    "face-detection",
+    "face-api.js",
+    "computer-vision"
+  ],
   "author": "Mammen Mathew",
   "license": "MIT",
   "files": [
     "FaceDetectionModule.js"
   ],
   "dependencies": {
-    "face-api.js": "^0.22.2" 
+    "face-api.js": "^0.22.2"
   }
 }
