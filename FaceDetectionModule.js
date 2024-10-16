@@ -8,6 +8,8 @@ class FaceDetectionModule {
     this.userPresentCallback = null;
     this.userNotPresentThreshold = 20000; // Default to 20 seconds
     this.videoElement = null; // Hold reference to video element
+    this.referenceDescriptor = null; // Hold the face descriptor of the reference image
+    this.faceMatchThreshold = 0.6; // Default threshold for face matching
   }
 
   async loadModels() {
@@ -24,15 +26,34 @@ class FaceDetectionModule {
     }
   }
 
-  startDetection({ 
-    callback, 
-    detectionIntervalTime = 100, 
-    userNotPresentThreshold = 20000, 
-    useCanvas = false 
+  async loadReferenceImage(referenceImageUrl) {
+    try {
+      const img = await faceapi.fetchImage(referenceImageUrl);
+      const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
+      if (!detection) {
+        throw new Error('No face detected in the reference image.');
+      }
+      this.referenceDescriptor = detection.descriptor;
+      console.info('Reference image loaded and descriptor computed.');
+    } catch (error) {
+      console.error('Error loading reference image:', error);
+      throw error;
+    }
+  }
+
+  startDetection({
+    callback,
+    detectionIntervalTime = 100,
+    userNotPresentThreshold = 20000,
+    useCanvas = false
   } = {}) {
     if (!this.modelsLoaded) {
       console.warn('Attempted to start detection before models were loaded.');
       throw new Error('Models not loaded. Call loadModels() first.');
+    }
+
+    if (!this.referenceDescriptor) {
+      throw new Error('Reference face descriptor is not loaded. Call loadReferenceImage() first.');
     }
 
     this.userPresentCallback = callback;
@@ -75,8 +96,14 @@ class FaceDetectionModule {
 
           if (detections.length > 0) {
             this.lastDetectionTime = Date.now();
+            
+            const currentDescriptor = detections[0].descriptor;
+            const distance = faceapi.euclideanDistance(currentDescriptor, this.referenceDescriptor);
+
+            const isSamePerson = distance < this.faceMatchThreshold;
+
             if (this.userPresentCallback) {
-              this.userPresentCallback(true);
+              this.userPresentCallback(isSamePerson);
             }
           } else if (this.lastDetectionTime && Date.now() - this.lastDetectionTime > this.userNotPresentThreshold) {
             if (this.userPresentCallback) {
