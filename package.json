@@ -1,10 +1,12 @@
 {
   "name": "face-detection-module",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A module for real-time face detection using face-api.js",
-  "main": "FaceDetectionModule.js",
+  "main": "dist/FaceDetectionModule.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
+    "build": "rollup -c",
+    "test": "mocha"
   },
   "keywords": [
     "face-detection",
@@ -14,9 +16,23 @@
   "author": "Mammen Mathew",
   "license": "MIT",
   "files": [
-    "FaceDetectionModule.js"
+    "dist",
+    "models"
   ],
   "dependencies": {
     "face-api.js": "^0.22.2"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-url": "^7.0.0",
+    "chai": "^5.1.2",
+    "install": "^0.13.0",
+    "mocha": "^10.8.2",
+    "rollup": "^2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mammenmathewz/User_face_Validater.git"
   }
 }

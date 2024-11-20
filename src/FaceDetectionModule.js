@@ -8,54 +8,33 @@ class FaceDetectionModule {
     this.userPresentCallback = null;
     this.userNotPresentThreshold = 20000; // Default to 20 seconds
     this.videoElement = null; // Hold reference to video element
-    this.referenceDescriptor = null; // Hold the face descriptor of the reference image
-    this.faceMatchThreshold = 0.6; // Default threshold for face matching
   }
 
   async loadModels() {
-    const cdnPath = 'https://mammenmathewz.github.io/User_face_Validater/models'; 
     try {
-      await faceapi.nets.tinyFaceDetector.loadFromUri(`${cdnPath}`);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(`${cdnPath}`);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(`${cdnPath}`);
-      console.info('Face detection models loaded successfully.');
+      const modelPath = new URL('../models/', import.meta.url).toString(); // Dynamically resolve model path
+      await faceapi.nets.tinyFaceDetector.loadFromUri(modelPath);
+      await faceapi.nets.faceLandmark68Net.loadFromUri(modelPath);
+      await faceapi.nets.faceRecognitionNet.loadFromUri(modelPath);
+
+      console.log('Models loaded successfully');
       this.modelsLoaded = true;
     } catch (error) {
-      console.error('Failed to load face detection models:', error);
+      console.error('Error loading models:', error);
       throw error;
     }
   }
 
-  async loadReferenceImage(referenceImageUrl) {
-    try {
-      const img = await faceapi.fetchImage(referenceImageUrl);
-      const detection = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor();
-      if (!detection) {
-        throw new Error('No face detected in the reference image.');
-      }
-      this.referenceDescriptor = detection.descriptor;
-      console.info('Reference image loaded and descriptor computed.');
-    } catch (error) {
-      console.error('Error loading reference image:', error);
-      throw error;
-    }
-  }
-
-  startDetection({
-    callback,
-    detectionIntervalTime = 100,
-    userNotPresentThreshold = 20000,
-    useCanvas = false
+  startDetection({ 
+    callback, 
+    detectionIntervalTime = 100, 
+    userNotPresentThreshold = 20000, 
+    useCanvas = false 
   } = {}) {
     if (!this.modelsLoaded) {
-      console.warn('Attempted to start detection before models were loaded.');
       throw new Error('Models not loaded. Call loadModels() first.');
     }
-
-    if (!this.referenceDescriptor) {
-      throw new Error('Reference face descriptor is not loaded. Call loadReferenceImage() first.');
-    }
-
+  
     this.userPresentCallback = callback;
     this.userNotPresentThreshold = userNotPresentThreshold;
 
@@ -96,14 +75,8 @@ class FaceDetectionModule {
 
           if (detections.length > 0) {
             this.lastDetectionTime = Date.now();
-            
-            const currentDescriptor = detections[0].descriptor;
-            const distance = faceapi.euclideanDistance(currentDescriptor, this.referenceDescriptor);
-
-            const isSamePerson = distance < this.faceMatchThreshold;
-
             if (this.userPresentCallback) {
-              this.userPresentCallback(isSamePerson);
+              this.userPresentCallback(true);
             }
           } else if (this.lastDetectionTime && Date.now() - this.lastDetectionTime > this.userNotPresentThreshold) {
             if (this.userPresentCallback) {
@@ -118,11 +91,9 @@ class FaceDetectionModule {
             faceapi.draw.drawFaceLandmarks(canvas, resizedDetections);
           }
         }, detectionIntervalTime);
-        
-        console.info('Face detection started.');
       })
       .catch(error => {
-        console.error('Error initializing face detection:', error);
+        console.error('Error starting detection:', error);
       });
   }
 
@@ -131,7 +102,6 @@ class FaceDetectionModule {
     if (this.detectionInterval) {
       clearInterval(this.detectionInterval);
       this.detectionInterval = null;
-      console.info('Detection interval cleared.');
     }
 
     // Stop the video stream and remove the video element
@@ -140,22 +110,19 @@ class FaceDetectionModule {
       if (stream) {
         const tracks = stream.getTracks();
         tracks.forEach(track => track.stop()); // Stop each track
-        console.info('Video tracks stopped.');
       }
       this.videoElement.srcObject = null;
       this.videoElement.remove();
       this.videoElement = null; // Clear reference to the video element
-      console.info('Video element removed from the DOM.');
     }
 
     // Remove canvas if it was created
     const canvas = document.querySelector('canvas');
     if (canvas) {
       canvas.remove();
-      console.info('Canvas removed from the DOM.');
     }
 
-    console.info("Face detection stopped and camera turned off.");
+    console.log("Face detection stopped and camera turned off.");
   }
 }
 
