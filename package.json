@@ -1,6 +1,6 @@
 {
   "name": "face-detection-module",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A module for real-time face detection using face-api.js",
   "main": "dist/FaceDetectionModule.js",
   "type": "module",
