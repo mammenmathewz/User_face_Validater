@@ -1,7 +1,7 @@
 import * as faceapi from 'face-api.js';
 
 class FaceDetectionModule {
-  constructor({ modelPath = 'https://cdn.example.com/face-api/models/' } = {}) {
+  constructor({ modelPath = 'https://mammenmathewz.github.io/User_face_Validater/models/' } = {}) {
     this.modelsLoaded = false;
     this.detectionInterval = null;
     this.lastDetectionTime = null;
