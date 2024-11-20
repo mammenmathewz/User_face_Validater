@@ -1,21 +1,24 @@
 import * as faceapi from 'face-api.js';
 
 class FaceDetectionModule {
-  constructor() {
+  constructor({ modelPath = 'https://cdn.example.com/face-api/models/' } = {}) {
     this.modelsLoaded = false;
     this.detectionInterval = null;
     this.lastDetectionTime = null;
     this.userPresentCallback = null;
     this.userNotPresentThreshold = 20000; // Default to 20 seconds
     this.videoElement = null; // Hold reference to video element
+    this.modelPath = modelPath; // Set the model path from user input or default
   }
 
   async loadModels() {
     try {
-      const modelPath = new URL('../models/', import.meta.url).toString(); // Dynamically resolve model path
-      await faceapi.nets.tinyFaceDetector.loadFromUri(modelPath);
-      await faceapi.nets.faceLandmark68Net.loadFromUri(modelPath);
-      await faceapi.nets.faceRecognitionNet.loadFromUri(modelPath);
+      console.log('Loading models from:', this.modelPath); // Log the path for debugging
+
+      // Load the models from the user-provided model path (now using CDN URLs)
+      await faceapi.nets.tinyFaceDetector.loadFromUri(this.modelPath + 'tiny_face_detector_model-weights_manifest.json');
+      await faceapi.nets.faceLandmark68Net.loadFromUri(this.modelPath + 'face_landmark_68_model-weights_manifest.json');
+      await faceapi.nets.faceRecognitionNet.loadFromUri(this.modelPath + 'face_recognition_model-weights_manifest.json');
 
       console.log('Models loaded successfully');
       this.modelsLoaded = true;
@@ -34,7 +37,7 @@ class FaceDetectionModule {
     if (!this.modelsLoaded) {
       throw new Error('Models not loaded. Call loadModels() first.');
     }
-  
+
     this.userPresentCallback = callback;
     this.userNotPresentThreshold = userNotPresentThreshold;
 

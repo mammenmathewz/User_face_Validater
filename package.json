@@ -19,7 +19,7 @@
     "dist",
     "models"
   ],
-  "dependencies": {
+  "peerDependencies": {
     "face-api.js": "^0.22.2"
   },
   "devDependencies": {
